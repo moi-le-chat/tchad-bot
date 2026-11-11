@@ -4,7 +4,6 @@ from discord.ext import commands
 import aiohttp
 from dotenv import load_dotenv
 
-# Chargement des variables d'environnement
 load_dotenv()
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -26,20 +25,19 @@ async def on_ready():
 @bot.command(name="verifier")
 async def verifier_joueur(ctx, pseudo: str):
     """Vérifie si un joueur fait partie du Tchad sur Jade."""
-    await ctx.send(f"🔍 Vérification de `{pseudo}` en cours...")
+    await ctx.send(f"Vérification de `{pseudo}` en cours...")
 
     async with aiohttp.ClientSession(headers=HEADERS) as session:
-        # 1. Requête profil joueur
         player_url = f"{BASE_URL}/players/{pseudo}"
         async with session.get(player_url) as resp:
             if resp.status == 404:
-                await ctx.send(f"❌ Le joueur `{pseudo}` est inconnu sur {SERVER.capitalize()} ou inactif depuis 90 jours.")
+                await ctx.send(f"Le joueur `{pseudo}` est inconnu sur {SERVER.capitalize()} ou inactif depuis 90 jours.")
                 return
             if resp.status == 403:
-                await ctx.send(f"🔒 Le profil de `{pseudo}` est privé. Impossible d'accéder aux informations.")
+                await ctx.send(f"Le profil de `{pseudo}` est privé. Impossible d'accéder aux informations.")
                 return
             if resp.status != 200:
-                await ctx.send(f"⚠️ Erreur API NationsGlory (Code: {resp.status}).")
+                await ctx.send(f"Erreur API NationsGlory (Code: {resp.status}).")
                 return
 
             player_data = (await resp.json()).get("data", {})
@@ -47,20 +45,18 @@ async def verifier_joueur(ctx, pseudo: str):
             role = player_data.get("role")
 
             if not country_id:
-                await ctx.send(f"❌ `{pseudo}` n'a aucun pays sur Jade.")
+                await ctx.send(f"`{pseudo}` n'a aucun pays sur Jade.")
                 return
 
-        # 2. Requête fiche pays
         country_url = f"{BASE_URL}/countries/{country_id}"
         async with session.get(country_url) as resp:
             if resp.status != 200:
-                await ctx.send("⚠️ Erreur lors de la récupération des détails du pays.")
+                await ctx.send("Erreur lors de la récupération des détails du pays.")
                 return
 
             country_data = (await resp.json()).get("data", {})
             country_name = country_data.get("name")
 
-            # 3. Traitement du résultat
             if country_name.lower() == PAYS_CIBLE.lower():
                 power = country_data.get("power")
                 score = country_data.get("score")
@@ -68,7 +64,7 @@ async def verifier_joueur(ctx, pseudo: str):
                 members = country_data.get("members_count")
 
                 embed = discord.Embed(
-                    title=f"✅ {pseudo} appartient bien au {country_name} !",
+                    title=f"{pseudo} appartient bien au {country_name} !",
                     color=0x2ecc71
                 )
                 embed.add_field(name="Grade", value=role, inline=False)
@@ -79,7 +75,7 @@ async def verifier_joueur(ctx, pseudo: str):
 
                 await ctx.send(embed=embed)
             else:
-                await ctx.send(f"❌ `{pseudo}` n'est pas au Tchad. Il appartient actuellement au pays **{country_name}**.")
+                await ctx.send(f"`{pseudo}` n'est pas au Tchad. Il appartient actuellement au pays **{country_name}**.")
 
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)
