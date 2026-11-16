@@ -51,3 +51,6 @@ Sur Discord :
 ```text
 !verifier <pseudo>
 ```
+## Note sur le développement
+
+Une partie du code a été revue et corrigée à l'aide d'une IA.
