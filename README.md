@@ -49,7 +49,7 @@ python bot.py
 Sur Discord :
 
 ```text
-!verifier <pseudo>
+!pays
 ```
 ## Note sur le développement
 
